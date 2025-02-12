@@ -56,6 +56,8 @@ def physics_loss(model, x, t):
         tape.watch(x)
         tape.watch(t)
         u_pred = model(tf.concat([x, t], axis=1))
+        print('u_pred: ', u_pred)
+        print(x.shape)
         u_x = tape.gradient(u_pred, x)
         u_xx = tape.gradient(u_x, x)
         u_t = tape.gradient(u_pred, t)
@@ -74,9 +76,10 @@ model = PINN()
 optimizer = keras.optimizers.Adam(learning_rate=0.001)
 
 # Training loop
-num_epochs = 500
+num_epochs = 2
 for epoch in range(num_epochs):
     with tf.GradientTape() as tape:
+        # print(x_train_tf.shape, t_train_tf.shape)
         physics_loss_value = physics_loss(model, x_train_tf, t_train_tf)
         data_loss_value = tf.reduce_mean(tf.square(model(input_train) - u_exact_tf))
         total_loss = physics_loss_value + data_loss_value
@@ -84,8 +87,9 @@ for epoch in range(num_epochs):
     gradients = tape.gradient(total_loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-    if epoch % 100 == 0:
+    if epoch % 10 == 0:
         print(f"Epoch {epoch}/{num_epochs}, Total Loss: {total_loss.numpy()}, Physics Loss: {physics_loss_value.numpy()}, Data Loss: {data_loss_value.numpy()}")
+
 u_pred=model(input_test)
 
 plt.plot(x_test, u_exact_test, label='Exact Solution')

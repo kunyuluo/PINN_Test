@@ -56,6 +56,7 @@ loss_tape = []
 for i in range(0, epochs):
     avg_loss = 0
     for step, (x_batch, y_batch) in enumerate(dataset):
+        # print(x_batch.shape, y_batch.shape)
         loss = train_step_v2(x_batch, y_batch)
         avg_loss += loss.numpy()
 
